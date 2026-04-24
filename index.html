@@ -493,6 +493,7 @@ body.rtl textarea {
   <div class="qr-modal">
     <div class="qr-modal-title" id="qrTitle"></div>
     <div id="qrContainer"></div>
+     <button id="qrSaveBtn" onclick="saveQR()">PNG保存</button>
     <button onclick="closeQRModal()" data-i18n="close">閉じる</button>
   </div>
 </div>
@@ -636,6 +637,32 @@ async function buildLangMenu() {
 function toggleLangMenu() {
   const menu = document.getElementById("langMenu");
   menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
+}
+function saveQR() {
+  const container = document.getElementById("qrContainer");
+
+  // QRCode.js は <img> または <canvas> を生成する
+  const img = container.querySelector("img");
+  const canvas = container.querySelector("canvas");
+
+  let dataUrl = null;
+
+  if (img) {
+    // <img> の場合はそのまま取得
+    dataUrl = img.src;
+  } else if (canvas) {
+    // <canvas> の場合は PNG に変換
+    dataUrl = canvas.toDataURL("image/png");
+  } else {
+    alert("QRコードが見つかりません。");
+    return;
+  }
+
+  // ダウンロードリンクを作成
+  const a = document.createElement("a");
+  a.href = dataUrl;
+  a.download = "key_qr.png";
+  a.click();
 }
 
 // ============================
