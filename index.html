@@ -497,6 +497,19 @@ body.rtl textarea {
     <button onclick="closeQRModal()" data-i18n="close">閉じる</button>
   </div>
 </div>
+<!-- 鍵QR表示用モーダルとは別にしてOK -->
+<div id="qrScanBackdrop" class="modal-backdrop" style="display:none;">
+  <div class="modal">
+    <h2>QR読み取り</h2>
+    <video id="qrVideo" autoplay playsinline></video>
+    <div class="qr-scan-controls">
+      <button onclick="startQRScan()">カメラ開始</button>
+      <button onclick="stopQRScan()">停止</button>
+      <button onclick="closeQRScanModal()">閉じる</button>
+    </div>
+    <div id="qrScanStatus"></div>
+  </div>
+</div>
 
 <!-- QRライブラリ（埋め込み版） -->
    <!-- QRライブラリ（外部読み込み） -->
