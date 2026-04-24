@@ -279,6 +279,17 @@ body.rtl textarea {
   transform: translateX(-2px);
 }
 
+#langMenu input {
+  width: 90%;
+  padding: 8px;
+  margin: 5px auto;
+  border-radius: 6px;
+  border: 1px solid #666;
+  background: #222;
+  color: #fff;
+  font-size: 14px;
+  display: block;
+}
 
 
 
@@ -506,11 +517,7 @@ document.getElementById("licenseBtn").onclick = () => {
 https://github.com/davidshimjs/qrcodejs
 Licensed under the MIT License.
 
-Copyright (c) 2012-2023 davidshimjs
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction...`;
+Permission is hereby granted, free of charge...`;
 };
 
 function closeLicenseModal() {
@@ -543,8 +550,8 @@ document.addEventListener("DOMContentLoaded", () => {
 // 多言語対応（JSON 読み込み）
 // ============================
 let currentLang = "ja";
-let rtlLangs = {};   // ← rtl.json を読み込む
-let langLabels = {}; // ← languages.json を読み込む
+let rtlLangs = {};
+let langLabels = {};
 
 // 言語 JSON 読み込み
 async function loadLang(lang) {
@@ -583,17 +590,14 @@ function detectBrowserLang() {
 
   const browser = navigator.language;
 
-  // 完全一致
   if (langLabels[browser]) return browser;
-
-  // zh → zh-CN
   if (browser.startsWith("zh")) return "zh-CN";
 
   return "en";
 }
 
 // ============================
-// 言語メニュー自動生成
+// 言語メニュー（検索バー付き）
 // ============================
 async function buildLangMenu() {
   const menu = document.getElementById("langMenu");
@@ -602,13 +606,30 @@ async function buildLangMenu() {
   const res = await fetch("./lang/languages.json");
   langLabels = await res.json();
 
-  // メニュー生成
-  menu.innerHTML = "";
-  Object.entries(langLabels).forEach(([code, label]) => {
-    const item = document.createElement("span");
-    item.textContent = label;
-    item.onclick = () => setLang(code);
-    menu.appendChild(item);
+  // メニュー初期化（検索バー追加）
+  menu.innerHTML = `
+    <input id="langSearch" type="text" placeholder="Search language..." />
+  `;
+
+  const searchInput = document.getElementById("langSearch");
+
+  function renderList(filter = "") {
+    menu.querySelectorAll("span").forEach(el => el.remove());
+
+    Object.entries(langLabels).forEach(([code, label]) => {
+      if (label.toLowerCase().includes(filter.toLowerCase())) {
+        const item = document.createElement("span");
+        item.textContent = label;
+        item.onclick = () => setLang(code);
+        menu.appendChild(item);
+      }
+    });
+  }
+
+  renderList("");
+
+  searchInput.addEventListener("input", () => {
+    renderList(searchInput.value);
   });
 }
 
@@ -621,7 +642,7 @@ function toggleLangMenu() {
 // 初期化
 // ============================
 document.addEventListener("DOMContentLoaded", async () => {
-  // RTL 言語読み込み
+  // RTL 読み込み
   const rtlRes = await fetch("./lang/rtl.json");
   rtlLangs = await rtlRes.json();
 
@@ -634,8 +655,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   applyDirection(currentLang);
 });
 </script>
-
-
 
 <!-- JSファイル読み込み順（絶対にこの順番） -->
 <script src="./angou_keys.js"></script>
