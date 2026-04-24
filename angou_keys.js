@@ -131,24 +131,26 @@ function generateKey(which) {
 }
 
 /* -----------------------------
-   鍵QRポップアップ
+   鍵QRポップアップ（安全版）
 ----------------------------- */
-function generateKeyQR(which) {
+async function generateKeyQR(which) {
   const name = document.getElementById("genKeyName" + which).value || `key${which}.bin`;
   const size = parseInt(document.getElementById("genKeySize" + which).value, 10);
 
   const keyBytes = new Uint8Array(size);
   crypto.getRandomValues(keyBytes);
 
-  let bin = "";
-  for (let i = 0; i < keyBytes.length; i++) bin += String.fromCharCode(keyBytes[i]);
-  const b64 = btoa(bin);
+  // QR に入れるのは鍵のハッシュのみ（安全 & QRエラー防止）
+  const hash = await crypto.subtle.digest("SHA-256", keyBytes);
+  const hex = [...new Uint8Array(hash)]
+    .map(x => x.toString(16).padStart(2, "0"))
+    .join("");
 
   const payload = JSON.stringify({
     name,
     size,
     type: "ANGOU-KEY",
-    key: b64
+    hash: hex
   });
 
   const backdrop = document.getElementById("qrBackdrop");
