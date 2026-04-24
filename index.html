@@ -2,152 +2,464 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>HTEncryption</title>
+<title>ANGOU HUD SYSTEM</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="favicon.png">
 
-<!-- ===== CSS（あなたの既存CSSはそのまま） ===== -->
-<link rel="stylesheet" href="style.css">
+<style>
+/* ============================
+   ガラスHUD 全体デザイン
+============================ */
+body {
+  background: radial-gradient(circle at top, #12263a 0%, #050810 55%, #020308 100%);
+  color: #c8f7ff;
+  font-family: Consolas, monospace;
+  margin: 0;
+  padding: 20px;
+  overflow-x: hidden;
+}
 
+h1 {
+  text-align: center;
+  color: #9be8ff;
+  text-shadow: 0 0 12px #00c8ff;
+  margin-bottom: 25px;
+  animation: fadeDown 0.6s ease-out;
+}
+
+.section {
+  margin-bottom: 18px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: radial-gradient(circle at top left,
+    rgba(255,255,255,0.12) 0%,
+    rgba(10,16,24,0.85) 40%,
+    rgba(5,8,16,0.95) 100%);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+  backdrop-filter: blur(14px);
+  animation: fadeIn 0.5s ease-out;
+}
+
+textarea, input, select {
+  width: 100%;
+  background: rgba(8,16,24,0.85);
+  color: #dffaff;
+  border: 1px solid rgba(0,200,255,0.35);
+  padding: 9px 10px;
+  border-radius: 10px;
+  outline: none;
+  backdrop-filter: blur(6px);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+textarea {
+  height: 120px;
+  resize: vertical;
+}
+
+textarea:focus, input:focus, select:focus {
+  border-color: #00eaff;
+  box-shadow: 0 0 10px rgba(0,234,255,0.6);
+  transform: translateY(-1px);
+}
+
+button {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(0,180,255,0.2), rgba(0,255,200,0.18));
+  color: #aef3ff;
+  border: 1px solid rgba(0, 200, 255, 0.6);
+  padding: 11px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.18s;
+  backdrop-filter: blur(8px);
+}
+
+button:hover {
+  background: linear-gradient(135deg, rgba(0,200,255,0.45), rgba(0,255,220,0.35));
+  box-shadow: 0 0 14px #00c8ff;
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(1px) scale(0.99);
+  box-shadow: 0 0 6px #00c8ff;
+}
+
+input[type="file"] {
+  color: #c8f7ff;
+}
+
+input[type="file"]::file-selector-button {
+  background: rgba(8,16,24,0.85);
+  color: #aef3ff;
+  border: 1px solid rgba(0,200,255,0.35);
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: 0.2s;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background: rgba(0,200,255,0.35);
+  box-shadow: 0 0 10px rgba(0,234,255,0.6);
+}
+
+.flex-root {
+  display: flex;
+  gap: 18px;
+}
+
+.left-panel { flex: 1.1; }
+.center-panel { flex: 1.4; }
+.right-panel { flex: 0.9; }
+
+@media (max-width: 1100px) {
+  .flex-root { flex-direction: column; }
+}
+
+/* ============================
+   HUDログ
+============================ */
+.hud-log-wrapper {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: 320px;
+  max-height: 40vh;
+  z-index: 50;
+}
+
+.hud-log {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,255,200,0.5);
+  background: radial-gradient(circle at top,
+    rgba(0,255,200,0.18),
+    rgba(2,8,16,0.95));
+  box-shadow: 0 0 18px rgba(0,255,200,0.45);
+  backdrop-filter: blur(14px);
+  font-size: 11px;
+  color: #c8f7ff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: slideUp 0.4s ease-out;
+}
+
+.hud-log-body {
+  max-height: 22vh;
+  overflow-y: auto;
+}
+
+.hud-log-line {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ============================
+   QRポップアップ
+============================ */
+.qr-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.qr-modal {
+  background: rgba(0,255,200,0.15);
+  border: 1px solid rgba(0,255,200,0.6);
+  padding: 20px;
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 20px rgba(0,255,200,0.5);
+  animation: fadeIn 0.25s ease-out;
+}
+
+.hud-license-btn {
+  position: fixed;
+  right: 20px;
+  bottom: 80px;
+  padding: 6px 12px;
+  border: 1px solid rgba(0,255,200,0.5);
+  background: rgba(0,255,200,0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #aef3ff;
+  z-index: 9999;
+}
+
+.hud-license-btn:hover {
+  background: rgba(0,255,200,0.3);
+}
+
+#licenseBackdrop {
+  z-index: 10000;
+}
+
+.lang-switch {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.lang-toggle {
+  padding: 6px 14px;
+  border-radius: 10px;
+  background: rgba(0,255,200,0.15);
+  border: 1px solid rgba(0,255,200,0.4);
+  backdrop-filter: blur(10px);
+  color: #aef3ff;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.lang-toggle:hover {
+  background: rgba(0,255,200,0.35);
+  box-shadow: 0 0 10px #00eaff;
+}
+
+.lang-menu {
+  margin-top: 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(0,255,200,0.12);
+  border: 1px solid rgba(0,255,200,0.4);
+  backdrop-filter: blur(10px);
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+body.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+body.rtl .hud-log {
+  direction: rtl;
+  text-align: right;
+}
+
+body.rtl input,
+body.rtl textarea {
+  direction: rtl;
+  text-align: right;
+}
+
+.lang-menu span {
+  color: #aef3ff;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(0,255,200,0.3);
+  transition: 0.2s;
+}
+
+.lang-menu span:hover {
+  background: rgba(0,255,200,0.3);
+  box-shadow: 0 0 10px #00eaff;
+  transform: translateX(-2px);
+}
+
+#langMenu input {
+  width: 90%;
+  padding: 8px;
+  margin: 5px auto;
+  border-radius: 6px;
+  border: 1px solid #666;
+  background: #222;
+  color: #fff;
+  font-size: 14px;
+  display: block;
+}
+
+/* ============================
+   アニメーション
+============================ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
 </head>
+
 <body>
+<h1 data-i18n="title">ANGOU HUD SYSTEM</h1>
 
-<!-- ============================================================
-     HUDログ
-============================================================ -->
-<div id="hudLog">
-  <div id="hudLogBody"></div>
+<div class="lang-switch">
+  <div class="lang-toggle" onclick="toggleLangMenu()">LANG</div>
+  <div class="lang-menu" id="langMenu"></div>
 </div>
 
-<!-- ============================================================
-     鍵モード選択
-============================================================ -->
-<div class="section">
-  <h2>鍵モード</h2>
-  <select id="keyMode">
-    <option value="1">1本</option>
-    <option value="2">2本</option>
-    <option value="3">3本</option>
-    <option value="4">4本</option>
-  </select>
-  <span id="keyStatus" class="warn">鍵未読み込み</span>
-</div>
+<div class="flex-root">
 
-<!-- ============================================================
-     鍵読み込み
-============================================================ -->
-<div class="section">
-  <h2>鍵読み込み</h2>
+  <!-- 左：鍵管理 -->
+  <div class="left-panel">
+    <div class="section">
+      <h3 data-i18n="key_manage">鍵管理（1〜4鍵 + QR）</h3>
 
-  <div id="keyLoadA">
-    <p>鍵A</p>
-    <input type="file" id="keyFileA">
+      <label data-i18n="key_mode">鍵モード：</label>
+      <select id="keyMode">
+        <option value="1" data-i18n="keyA_only">Aのみ</option>
+        <option value="2" data-i18n="keyAB">A+B</option>
+        <option value="3" data-i18n="keyABC">A+B+C</option>
+        <option value="4" data-i18n="keyABCD">A+B+C+D</option>
+      </select>
+
+      <br><br>
+
+      <div id="keyLoadA">
+        <label data-i18n="keyA">鍵A：</label>
+        <input type="file" id="keyFileA">
+      </div>
+
+      <div id="keyLoadB">
+        <label data-i18n="keyB">鍵B：</label>
+        <input type="file" id="keyFileB">
+      </div>
+
+      <div id="keyLoadC">
+        <label data-i18n="keyC">鍵C：</label>
+        <input type="file" id="keyFileC">
+      </div>
+
+      <div id="keyLoadD">
+        <label data-i18n="keyD">鍵D：</label>
+        <input type="file" id="keyFileD">
+      </div>
+
+      <br>
+      <span id="keyStatus" class="warn" data-i18n="key_not_loaded">鍵未読み込み</span>
+
+      <hr>
+
+      <h4 data-i18n="key_gen_title">鍵生成（QR対応）</h4>
+
+      <!-- 鍵A -->
+      <details id="genA" open>
+        <summary data-i18n="genA_title">鍵A 生成</summary>
+        <label data-i18n="filename">ファイル名：</label>
+        <input id="genKeyNameA" value="keyA.bin">
+        <label data-i18n="size">サイズ：</label>
+        <select id="genKeySizeA">
+          <option value="4096">4KB</option>
+          <option value="8192">8KB</option>
+          <option value="16384">16KB</option>
+        </select>
+        <button onclick="generateKey('A')" data-i18n="genA_btn">鍵A生成</button>
+        <button onclick="generateKeyQR('A')" data-i18n="genA_qr_btn">鍵A QR表示</button>
+
+        <!-- ★ A案：ここに分割QR生成ボタンを追加 -->
+        <button onclick="generateKeyQR_Multi('A')">鍵A 分割QR生成</button>
+      </details>
+
+      <!-- 鍵B -->
+      <details id="genB">
+        <summary data-i18n="genB_title">鍵B 生成</summary>
+        <label data-i18n="filename">ファイル名：</label>
+        <input id="genKeyNameB" value="keyB.bin">
+        <label data-i18n="size">サイズ：</label>
+        <select id="genKeySizeB">
+          <option value="4096">4KB</option>
+          <option value="8192">8KB</option>
+          <option value="16384">16KB</option>
+        </select>
+        <button onclick="generateKey('B')" data-i18n="genB_btn">鍵B生成</button>
+        <button onclick="generateKeyQR('B')" data-i18n="genB_qr_btn">鍵B QR表示</button>
+
+        <!-- ★ A案：ここに追加 -->
+        <button onclick="generateKeyQR_Multi('B')">鍵B 分割QR生成</button>
+      </details>
+
+      <!-- 鍵C -->
+      <details id="genC">
+        <summary data-i18n="genC_title">鍵C 生成</summary>
+        <label data-i18n="filename">ファイル名：</label>
+        <input id="genKeyNameC" value="keyC.bin">
+        <label data-i18n="size">サイズ：</label>
+        <select id="genKeySizeC">
+          <option value="4096">4KB</option>
+          <option value="8192">8KB</option>
+          <option value="16384">16KB</option>
+        </select>
+        <button onclick="generateKey('C')" data-i18n="genC_btn">鍵C生成</button>
+        <button onclick="generateKeyQR('C')" data-i18n="genC_qr_btn">鍵C QR表示</button>
+
+        <!-- ★ A案：ここに追加 -->
+        <button onclick="generateKeyQR_Multi('C')">鍵C 分割QR生成</button>
+      </details>
+
+      <!-- 鍵D -->
+      <details id="genD">
+        <summary data-i18n="genD_title">鍵D 生成</summary>
+        <label data-i18n="filename">ファイル名：</label>
+        <input id="genKeyNameD" value="keyD.bin">
+        <label data-i18n="size">サイズ：</label>
+        <select id="genKeySizeD">
+          <option value="4096">4KB</option>
+          <option value="8192">8KB</option>
+          <option value="16384">16KB</option>
+        </select>
+        <button onclick="generateKey('D')" data-i18n="genD_btn">鍵D生成</button>
+        <button onclick="generateKeyQR('D')" data-i18n="genD_qr_btn">鍵D QR表示</button>
+
+        <!-- ★ A案：ここに追加 -->
+        <button onclick="generateKeyQR_Multi('D')">鍵D 分割QR生成</button>
+      </details>
+
+    </div>
   </div>
 
-  <div id="keyLoadB">
-    <p>鍵B</p>
-    <input type="file" id="keyFileB">
-  </div>
-
-  <div id="keyLoadC">
-    <p>鍵C</p>
-    <input type="file" id="keyFileC">
-  </div>
-
-  <div id="keyLoadD">
-    <p>鍵D</p>
-    <input type="file" id="keyFileD">
-  </div>
-</div>
-
-<!-- ============================================================
-     鍵生成
-============================================================ -->
-<div class="section">
-  <h2>鍵生成</h2>
-
-  <!-- 鍵A -->
-  <details id="genA">
-    <summary>鍵A</summary>
-    <input id="genKeyNameA" placeholder="keyA.bin">
-    <input id="genKeySizeA" type="number" value="4096">
-    <button onclick="generateKey('A')">鍵A 生成</button>
-    <button onclick="generateKeyQR('A')">鍵A QR（ハッシュ）</button>
-    <button onclick="generateKeyQR_Multi('A')">鍵A 分割QR生成</button>
-  </details>
-
-  <!-- 鍵B -->
-  <details id="genB">
-    <summary>鍵B</summary>
-    <input id="genKeyNameB" placeholder="keyB.bin">
-    <input id="genKeySizeB" type="number" value="4096">
-    <button onclick="generateKey('B')">鍵B 生成</button>
-    <button onclick="generateKeyQR('B')">鍵B QR（ハッシュ）</button>
-    <button onclick="generateKeyQR_Multi('B')">鍵B 分割QR生成</button>
-  </details>
-
-  <!-- 鍵C -->
-  <details id="genC">
-    <summary>鍵C</summary>
-    <input id="genKeyNameC" placeholder="keyC.bin">
-    <input id="genKeySizeC" type="number" value="4096">
-    <button onclick="generateKey('C')">鍵C 生成</button>
-    <button onclick="generateKeyQR('C')">鍵C QR（ハッシュ）</button>
-    <button onclick="generateKeyQR_Multi('C')">鍵C 分割QR生成</button>
-  </details>
-
-  <!-- 鍵D -->
-  <details id="genD">
-    <summary>鍵D</summary>
-    <input id="genKeyNameD" placeholder="keyD.bin">
-    <input id="genKeySizeD" type="number" value="4096">
-    <button onclick="generateKey('D')">鍵D 生成</button>
-    <button onclick="generateKeyQR('D')">鍵D QR（ハッシュ）</button>
-    <button onclick="generateKeyQR_Multi('D')">鍵D 分割QR生成</button>
-  </details>
-</div>
-
-<!-- ============================================================
-     QR表示モーダル（既存）
-============================================================ -->
-<div id="qrBackdrop" class="qr-modal-backdrop" style="display:none;">
-  <div class="qr-modal">
-    <h2 id="qrTitle"></h2>
-    <div id="qrContainer"></div>
-    <button onclick="closeQRModal()">閉じる</button>
-  </div>
-</div>
-
-<!-- ============================================================
-     QR読み取りモーダル（新規追加）
-============================================================ -->
-<div id="qrScanBackdrop" class="qr-modal-backdrop" style="display:none;">
-  <div class="qr-modal">
-    <h2>QR読み取り</h2>
-
-    <video id="qrVideo" autoplay playsinline></video>
-
-    <div class="qr-scan-controls">
-      <button onclick="startQRScan()">カメラ開始</button>
-      <button onclick="stopQRScan()">停止</button>
-      <button onclick="closeQRScanModal()">閉じる</button>
+  <!-- 中央：暗号化UI -->
+  <div class="center-panel">
+    <div class="section">
+      <label data-i18n="mode">モード：</label>
+      <select id="mode">
+        <option value="text" data-i18n="mode_text">テキスト</option>
+        <option value="file" data-i18n="mode_file">ファイル</option>
+      </select>
     </div>
 
-    <div id="qrScanStatus"></div>
-  </div>
-</div>
+    <div class="section">
+      <label data-i18n="passphrase">パスフレーズ：</label>
+      <input type="password" id="passphrase">
+    </div>
 
-<!-- ============================================================
-     スクリプト読み込み（順番が重要）
-============================================================ -->
+    <div class="section" id="textAreaSection">
+      <label data-i18n="plain">平文：</label>
+      <textarea id="plain"></textarea>
+      <label data-i18n="cipher">暗号文：</label>
+      <textarea id="cipher"></textarea>
+    </div>
 
-<!-- QR読み取り用ライブラリ -->
-<script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
-
-<!-- QRコード生成ライブラリ -->
-<script src="qrcode.min.js"></script>
-
-<!-- あなたの最新 angou_keys.js -->
-<script src="angou_keys.js"></script>
-
-</body>
-</html>
+    <div class="section" id="fileAreaSection" style="display:none;">
+      <label data-i18n="file_encrypt">暗号化するファイル：</label>
+      <
