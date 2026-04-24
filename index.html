@@ -1,198 +1,39 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<title>ANGOU HUD SYSTEM</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/png" href="favicon.png">
+      </details>
 
-<style>
-/* ============================
-   ガラスHUD 全体デザイン
-============================ */
-body {
-  background: radial-gradient(circle at top, #12263a 0%, #050810 55%, #020308 100%);
-  color: #c8f7ff;
-  font-family: Consolas, monospace;
-  margin: 0;
-  padding: 20px;
-  overflow-x: hidden;
-}
+    </div>
+  </div>
 
-h1 {
-  text-align: center;
-  color: #9be8ff;
-  text-shadow: 0 0 12px #00c8ff;
-  margin-bottom: 25px;
-  animation: fadeDown 0.6s ease-out;
-}
+  <!-- 中央：暗号化UI -->
+  <div class="center-panel">
+    <div class="section">
+      <label data-i18n="mode">モード：</label>
+      <select id="mode">
+        <option value="text" data-i18n="mode_text">テキスト</option>
+        <option value="file" data-i18n="mode_file">ファイル</option>
+      </select>
+    </div>
 
-.section {
-  margin-bottom: 18px;
-  padding: 16px;
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: radial-gradient(circle at top left,
-    rgba(255,255,255,0.12) 0%,
-    rgba(10,16,24,0.85) 40%,
-    rgba(5,8,16,0.95) 100%);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
-  backdrop-filter: blur(14px);
-  animation: fadeIn 0.5s ease-out;
-}
+    <div class="section">
+      <label data-i18n="passphrase">パスフレーズ：</label>
+      <input type="password" id="passphrase">
+    </div>
 
-textarea, input, select {
-  width: 100%;
-  background: rgba(8,16,24,0.85);
-  color: #dffaff;
-  border: 1px solid rgba(0,200,255,0.35);
-  padding: 9px 10px;
-  border-radius: 10px;
-  outline: none;
-  backdrop-filter: blur(6px);
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
-}
+    <div class="section" id="textAreaSection">
+      <label data-i18n="plain">平文：</label>
+      <textarea id="plain"></textarea>
+      <label data-i18n="cipher">暗号文：</label>
+      <textarea id="cipher"></textarea>
+    </div>
 
-textarea {
-  height: 120px;
-  resize: vertical;
-}
-
-textarea:focus, input:focus, select:focus {
-  border-color: #00eaff;
-  box-shadow: 0 0 10px rgba(0,234,255,0.6);
-  transform: translateY(-1px);
-}
-
-button {
-  width: 100%;
-  background: linear-gradient(135deg, rgba(0,180,255,0.2), rgba(0,255,200,0.18));
-  color: #aef3ff;
-  border: 1px solid rgba(0, 200, 255, 0.6);
-  padding: 11px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: 0.18s;
-  backdrop-filter: blur(8px);
-}
-
-button:hover {
-  background: linear-gradient(135deg, rgba(0,200,255,0.45), rgba(0,255,220,0.35));
-  box-shadow: 0 0 14px #00c8ff;
-  transform: translateY(-1px);
-}
-
-button:active {
-  transform: translateY(1px) scale(0.99);
-  box-shadow: 0 0 6px #00c8ff;
-}
-
-input[type="file"] {
-  color: #c8f7ff;
-}
-
-input[type="file"]::file-selector-button {
-  background: rgba(8,16,24,0.85);
-  color: #aef3ff;
-  border: 1px solid rgba(0,200,255,0.35);
-  padding: 6px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  backdrop-filter: blur(6px);
-  transition: 0.2s;
-}
-
-input[type="file"]::file-selector-button:hover {
-  background: rgba(0,200,255,0.35);
-  box-shadow: 0 0 10px rgba(0,234,255,0.6);
-}
-
-.flex-root {
-  display: flex;
-  gap: 18px;
-}
-
-.left-panel { flex: 1.1; }
-.center-panel { flex: 1.4; }
-.right-panel { flex: 0.9; }
-
-@media (max-width: 1100px) {
-  .flex-root { flex-direction: column; }
-}
-
-/* ============================
-   HUDログ
-============================ */
-.hud-log-wrapper {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  width: 320px;
-  max-height: 40vh;
-  z-index: 50;
-}
-
-.hud-log {
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(0,255,200,0.5);
-  background: radial-gradient(circle at top,
-    rgba(0,255,200,0.18),
-    rgba(2,8,16,0.95));
-  box-shadow: 0 0 18px rgba(0,255,200,0.45);
-  backdrop-filter: blur(14px);
-  font-size: 11px;
-  color: #c8f7ff;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  animation: slideUp 0.4s ease-out;
-}
-
-.hud-log-body {
-  max-height: 22vh;
-  overflow-y: auto;
-}
-
-.hud-log-line {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* ============================
-   QRポップアップ
-============================ */
-.qr-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.65);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-.qr-modal {
-  background: rgba(0,255,200,0.15);
-  border: 1px solid rgba(0,255,200,0.6);
-  padding: 20px;
-  border-radius: 16px;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 0 20px rgba(0,255,200,0.5);
-  animation: fadeIn 0.25s ease-out;
-}
+    <div class="section" id="fileAreaSection" style="display:none;">
+      <label data-i18n="file_encrypt">暗号化するファイル：</label>
       <input type="file" id="fileInput" multiple>
       <label data-i18n="file_decrypt">復号する .enc ファイル：</label>
       <input type="file" id="encFileInput" multiple>
     </div>
 
     <div class="section">
-      <label><input type="checkbox" id="opMode"> 
-        <span data-i18n="op_mode">作戦モード（痕跡ゼロ）</span>
-      </label>
+      <label><input type="checkbox" id="opMode"> <span data-i18n="op_mode">作戦モード（痕跡ゼロ）</span></label>
     </div>
 
     <div class="section">
@@ -201,15 +42,13 @@ input[type="file"]::file-selector-button:hover {
     </div>
   </div>
 
-  <!-- LICENSE ボタン -->
-  <div id="licenseBtn" class="hud-license-btn">LICENSE</div>
+<div id="licenseBtn" class="hud-license-btn">LICENSE</div>
 
   <!-- 右：HUDログ -->
   <div class="right-panel"></div>
 
 </div>
 
-<!-- LICENSE モーダル -->
 <div class="qr-modal-backdrop" id="licenseBackdrop">
   <div class="qr-modal">
     <h3 data-i18n="license_title">ライセンス情報</h3>
@@ -226,42 +65,38 @@ input[type="file"]::file-selector-button:hover {
   </div>
 </div>
 
-<!-- QRポップアップ（鍵QR表示） -->
+<!-- QRポップアップ -->
 <div class="qr-modal-backdrop" id="qrBackdrop">
   <div class="qr-modal">
     <div class="qr-modal-title" id="qrTitle"></div>
     <div id="qrContainer"></div>
-    <button id="qrSaveBtn" onclick="saveQR()">PNG保存</button>
+     <button id="qrSaveBtn" onclick="saveQR()">PNG保存</button>
     <button onclick="closeQRModal()" data-i18n="close">閉じる</button>
   </div>
 </div>
-
-<!-- QR読み取りモーダル（カメラ対応） -->
-<div id="qrScanBackdrop" class="qr-modal-backdrop" style="display:none;">
-  <div class="qr-modal">
+<!-- 鍵QR表示用モーダルとは別にしてOK -->
+<div id="qrScanBackdrop" class="modal-backdrop" style="display:none;">
+  <div class="modal">
     <h2>QR読み取り</h2>
     <video id="qrVideo" autoplay playsinline></video>
-
     <div class="qr-scan-controls">
       <button onclick="startQRScan()">カメラ開始</button>
       <button onclick="stopQRScan()">停止</button>
       <button onclick="closeQRScanModal()">閉じる</button>
     </div>
-
     <div id="qrScanStatus"></div>
   </div>
 </div>
 
-<!-- QRコード生成ライブラリ -->
+<!-- QRライブラリ（埋め込み版） -->
+   <!-- QRライブラリ（外部読み込み） -->
 <script src="./qrcode.min.js"></script>
 
-<!-- jsQR（カメラ読み取り用） -->
-<script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
-
+<!-- QRライブラリ（埋め込み版 + モード切替） -->
 <script>
-/* ============================
-   LICENSE モーダル
-============================ */
+// ============================
+// LICENSE モーダル
+// ============================
 document.getElementById("licenseBtn").onclick = () => {
   const backdrop = document.getElementById("licenseBackdrop");
   const text = document.getElementById("licenseText");
@@ -280,9 +115,9 @@ function closeLicenseModal() {
   document.getElementById("licenseBackdrop").style.display = "none";
 }
 
-/* ============================
-   モード切替（テキスト ⇄ ファイル）
-============================ */
+// ============================
+// モード切替（テキスト ⇄ ファイル）
+// ============================
 document.addEventListener("DOMContentLoaded", () => {
   const modeSelect = document.getElementById("mode");
   const textArea = document.getElementById("textAreaSection");
@@ -302,13 +137,14 @@ document.addEventListener("DOMContentLoaded", () => {
   updateMode();
 });
 
-/* ============================
-   多言語対応（JSON 読み込み）
-============================ */
+// ============================
+// 多言語対応（JSON 読み込み）
+// ============================
 let currentLang = "ja";
 let rtlLangs = {};
 let langLabels = {};
 
+// 言語 JSON 読み込み
 async function loadLang(lang) {
   const res = await fetch(`./lang/${lang}.json`);
   const data = await res.json();
@@ -319,6 +155,7 @@ async function loadLang(lang) {
   });
 }
 
+// RTL 言語対応
 function applyDirection(lang) {
   if (rtlLangs[lang]) {
     document.documentElement.setAttribute("dir", "rtl");
@@ -329,6 +166,7 @@ function applyDirection(lang) {
   }
 }
 
+// 言語切り替え
 function setLang(lang) {
   currentLang = lang;
   localStorage.setItem("lang", lang);
@@ -336,6 +174,7 @@ function setLang(lang) {
   applyDirection(lang);
 }
 
+// ブラウザ言語検出
 function detectBrowserLang() {
   const saved = localStorage.getItem("lang");
   if (saved) return saved;
@@ -348,15 +187,17 @@ function detectBrowserLang() {
   return "en";
 }
 
-/* ============================
-   言語メニュー（検索バー付き）
-============================ */
+// ============================
+// 言語メニュー（検索バー付き）
+// ============================
 async function buildLangMenu() {
   const menu = document.getElementById("langMenu");
 
+  // languages.json 読み込み
   const res = await fetch("./lang/languages.json");
   langLabels = await res.json();
 
+  // メニュー初期化（検索バー追加）
   menu.innerHTML = `
     <input id="langSearch" type="text" placeholder="Search language..." />
   `;
@@ -387,58 +228,54 @@ function toggleLangMenu() {
   const menu = document.getElementById("langMenu");
   menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
 }
-
-/* ============================
-   QR PNG保存
-============================ */
 function saveQR() {
   const container = document.getElementById("qrContainer");
 
+  // QRCode.js は <img> または <canvas> を生成する
   const img = container.querySelector("img");
   const canvas = container.querySelector("canvas");
 
   let dataUrl = null;
 
   if (img) {
+    // <img> の場合はそのまま取得
     dataUrl = img.src;
   } else if (canvas) {
+    // <canvas> の場合は PNG に変換
     dataUrl = canvas.toDataURL("image/png");
   } else {
     alert("QRコードが見つかりません。");
     return;
   }
 
+  // ダウンロードリンクを作成
   const a = document.createElement("a");
   a.href = dataUrl;
   a.download = "key_qr.png";
   a.click();
 }
 
-/* ============================
-   初期化
-============================ */
+// ============================
+// 初期化
+// ============================
 document.addEventListener("DOMContentLoaded", async () => {
+  // RTL 読み込み
   const rtlRes = await fetch("./lang/rtl.json");
   rtlLangs = await rtlRes.json();
 
+  // 言語メニュー生成
   await buildLangMenu();
 
+  // 言語決定
   currentLang = detectBrowserLang();
   loadLang(currentLang);
   applyDirection(currentLang);
 });
 </script>
-<!-- ============================
-     JSファイル読み込み（順番厳守）
-============================ -->
 
-<!-- angou_keys.js（鍵管理 + QR + カメラ + 署名） -->
+<!-- JSファイル読み込み順（絶対にこの順番） -->
 <script src="./angou_keys.js"></script>
-
-<!-- 暗号コア -->
 <script src="./angou_crypto_core.js"></script>
-
-<!-- CTR-HMAC 暗号化本体 -->
 <script src="./angou_ctr_hmac.js"></script>
 
 </body>
