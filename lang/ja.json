@@ -35,7 +35,7 @@
   "file_encrypt": "暗号化するファイル：",
   "file_decrypt": "復号する .enc ファイル：",
   "op_mode": "作戦モード（痕跡ゼロ）",
-  "encrypt": "トークン化",
+  "encrypt": "暗号化",
   "decrypt": "復号",
   "license_title": "ライセンス情報",
   "close": "閉じる",
