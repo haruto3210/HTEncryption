@@ -327,103 +327,39 @@ body.rtl textarea {
 
   <!-- 左：鍵管理 -->
   <div class="left-panel">
-    <div class="section">
-      <h3 data-i18n="key_manage">鍵管理（1〜4鍵 + QR）</h3>
+    <div class="section" style="margin-top:18px;">
+  <h3 style="color:#9be8ff; text-shadow:0 0 8px #00c8ff;">
+    サイト版をご利用中です
+  </h3>
 
-      <label data-i18n="key_mode">鍵モード：</label>
-      <select id="keyMode">
-        <option value="1" data-i18n="keyA_only">Aのみ</option>
-        <option value="2" data-i18n="keyAB">A+B</option>
-        <option value="3" data-i18n="keyABC">A+B+C</option>
-        <option value="4" data-i18n="keyABCD">A+B+C+D</option>
-      </select>
+  <p style="font-size:13px; color:#c8f7ff; line-height:1.6; margin-top:10px;">
+    このサイト版は軽量で便利ですが、ブラウザ環境に依存するため<br>
+    <span style="color:#ffb3b3;">大容量ファイルや高強度暗号化では制限が発生する場合があります。</span><br><br>
 
-      <br><br>
+    より強化された暗号化エンジンを使用する場合は、<br>
+    <span style="color:#aef3ff;">APP版（EXE）</span> をご利用ください。
+  </p>
 
-      <div id="keyLoadA">
-        <label data-i18n="keyA">鍵A：</label>
-        <input type="file" id="keyFileA">
-      </div>
+  <button
+    onclick="window.open('https://github.com/haruto3210/HTEncryption/releases/download/v1.0.0/HTEncryption_Setup_v1.0.0.exe')"
+    style="
+      width:100%;
+      margin-top:14px;
+      background:linear-gradient(135deg, rgba(0,200,255,0.35), rgba(0,255,220,0.25));
+      border:1px solid rgba(0,255,200,0.6);
+      color:#dff;
+      padding:12px;
+      border-radius:12px;
+      cursor:pointer;
+      backdrop-filter:blur(8px);
+      transition:0.2s;
+      font-size:14px;
+    "
+  >
+    最新の APP版（EXE）をダウンロード
+  </button>
+</div>
 
-      <div id="keyLoadB">
-        <label data-i18n="keyB">鍵B：</label>
-        <input type="file" id="keyFileB">
-      </div>
-
-      <div id="keyLoadC">
-        <label data-i18n="keyC">鍵C：</label>
-        <input type="file" id="keyFileC">
-      </div>
-
-      <div id="keyLoadD">
-        <label data-i18n="keyD">鍵D：</label>
-        <input type="file" id="keyFileD">
-      </div>
-
-      <br>
-      <span id="keyStatus" class="warn" data-i18n="key_not_loaded">鍵未読み込み</span>
-
-      <hr>
-
-      <h4 data-i18n="key_gen_title">鍵生成（QR対応）</h4>
-
-      <details id="genA" open>
-        <summary data-i18n="genA_title">鍵A 生成</summary>
-        <label data-i18n="filename">ファイル名：</label>
-        <input id="genKeyNameA" value="keyA.bin">
-        <label data-i18n="size">サイズ：</label>
-        <select id="genKeySizeA">
-          <option value="4096">4KB</option>
-          <option value="8192">8KB</option>
-          <option value="16384">16KB</option>
-        </select>
-        <button onclick="generateKey('A')" data-i18n="genA_btn">鍵A生成</button>
-        <button onclick="generateKeyQR('A')" data-i18n="genA_qr_btn">鍵A QR表示</button>
-      </details>
-
-      <details id="genB">
-        <summary data-i18n="genB_title">鍵B 生成</summary>
-        <label data-i18n="filename">ファイル名：</label>
-        <input id="genKeyNameB" value="keyB.bin">
-        <label data-i18n="size">サイズ：</label>
-        <select id="genKeySizeB">
-          <option value="4096">4KB</option>
-          <option value="8192">8KB</option>
-          <option value="16384">16KB</option>
-        </select>
-        <button onclick="generateKey('B')" data-i18n="genB_btn">鍵B生成</button>
-        <button onclick="generateKeyQR('B')" data-i18n="genB_qr_btn">鍵B QR表示</button>
-      </details>
-
-      <details id="genC">
-        <summary data-i18n="genC_title">鍵C 生成</summary>
-        <label data-i18n="filename">ファイル名：</label>
-        <input id="genKeyNameC" value="keyC.bin">
-        <label data-i18n="size">サイズ：</label>
-        <select id="genKeySizeC">
-          <option value="4096">4KB</option>
-          <option value="8192">8KB</option>
-          <option value="16384">16KB</option>
-        </select>
-        <button onclick="generateKey('C')" data-i18n="genC_btn">鍵C生成</button>
-        <button onclick="generateKeyQR('C')" data-i18n="genC_qr_btn">鍵C QR表示</button>
-      </details>
-
-      <details id="genD">
-        <summary data-i18n="genD_title">鍵D 生成</summary>
-        <label data-i18n="filename">ファイル名：</label>
-        <input id="genKeyNameD" value="keyD.bin">
-        <label data-i18n="size">サイズ：</label>
-        <select id="genKeySizeD">
-          <option value="4096">4KB</option>
-          <option value="8192">8KB</option>
-          <option value="16384">16KB</option>
-        </select>
-        <button onclick="generateKey('D')" data-i18n="genD_btn">鍵D生成</button>
-        <button onclick="generateKeyQR('D')" data-i18n="genD_qr_btn">鍵D QR表示</button>
-      </details>
-
-    </div>
   </div>
 
   <!-- 中央：暗号化UI -->
