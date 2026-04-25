@@ -303,13 +303,9 @@
           なお、キーをなくした場合復元できなくなるので、
             <span style="color:#ffb3b3;">
         ご注意ください。</p>
-      <a 
-  href="https://github.com/haruto3210/HTEncryption/releases/download/v1.0.1/HTEncryption_Setup_v1.0.1.exe" 
-  download="HTEncryption_Setup_v1.0.1.exe"
-  style="text-decoration: none;"
->
-  <button
+              <button
     type="button"
+    onclick="downloadLatestApp()"
     style="
       width:100%;
       margin-top:14px;
@@ -323,10 +319,9 @@
       transition:0.2s;
       font-size:14px;
     "
-  >
-    最新の APP版（EXE）をダウンロード
-  </button>
-</a>
+>
+    最新の APP版（EXE）を自動取得してダウンロード
+</button>
       </div>
     </div>
 
@@ -571,6 +566,32 @@ Permission is hereby granted, free of charge...`;
       loadLang(currentLang);
       applyDirection(currentLang);
     });
+    async function downloadLatestApp() {
+    try {
+        // GitHub APIから最新のリリース情報を取得
+        const response = await fetch('https://api.github.com/repos/haruto3210/HTEncryption/releases/latest');
+        const data = await response.json();
+        
+        // .exeファイルのURLを探す
+        const asset = data.assets.find(a => a.name.endsWith('.exe'));
+        
+        if (asset) {
+            const link = document.createElement('a');
+            link.href = asset.browser_download_url;
+            link.download = asset.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            console.log("Downloading: " + asset.name);
+        } else {
+            alert("最新の実行ファイルが見つかりませんでした。");
+        }
+    } catch (error) {
+        console.error("Download failed:", error);
+        // 失敗した時のフォールバックとして、HTMLに書いた固定リンクを開く
+        window.location.href = "https://github.com/haruto3210/HTEncryption/releases/latest";
+    }
+}
 
     // HTML から呼べるように window に公開
     window.toggleLangMenu = toggleLangMenu;
